@@ -1936,7 +1936,7 @@ class LanguageServerCompleter( Completer ):
       global_settings = completer_settings[ matched_keys[ 0 ] ]
       utils.UpdateDict( merged_ls_settings, global_settings )
 
-    # If there is no extra-conf, the total settings are just the merged defaults:
+    # If there is no extra-conf, the total settings are just the defaults
     self._settings = {
       'ls': merged_ls_settings
     }

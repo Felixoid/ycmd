@@ -1612,14 +1612,16 @@ class LanguageServerCompleterSettings_test( TestCase ):
       }
     }
   } )
-  def test_GetSettingsFromExtraConf_WithCompleterSettings_PrimaryKey( self, app ):
+  def test_GetSettingsFromExtraConf_WithCompleterSettings_PrimaryKey( self,
+                                                                      app ):
     # Test that primary key (language name) is used from completer_settings
     completer = MockCompleter()
     completer.SupportedFiletypes = lambda: [ 'test' ]
     completer.GetBinaryName = lambda: 'test-server'
     completer.DefaultSettings = lambda req: { 'setting1': 'hardcoded' }
 
-    request_data = BuildRequest( filepath = '/tmp/test.test', filetype = 'test' )
+    request_data = BuildRequest( filepath = '/tmp/test.test',
+                                 filetype = 'test' )
     completer._GetSettingsFromExtraConf( request_data )
 
     # Global settings should override hardcoded defaults
@@ -1644,7 +1646,8 @@ class LanguageServerCompleterSettings_test( TestCase ):
     completer.GetBinaryName = lambda: 'test-server'
     completer.DefaultSettings = lambda req: { 'setting1': 'hardcoded' }
 
-    request_data = BuildRequest( filepath = '/tmp/test.test', filetype = 'test' )
+    request_data = BuildRequest( filepath = '/tmp/test.test',
+                                 filetype = 'test' )
     completer._GetSettingsFromExtraConf( request_data )
 
     assert_that( completer._settings[ 'ls' ][ 'setting1' ],
@@ -1659,13 +1662,15 @@ class LanguageServerCompleterSettings_test( TestCase ):
   } )
   def test_GetSettingsFromExtraConf_WithDuplicateKeys_UsesFirst( self, app ):
     # Test that when duplicate keys exist, the first one is used
-    with patch( 'ycmd.completers.language_server.language_server_completer.LOGGER' ) as logger:
+    with patch( 'ycmd.completers.language_server.'
+                'language_server_completer.LOGGER' ) as logger:
       completer = MockCompleter()
       completer.SupportedFiletypes = lambda: [ 'test' ]
       completer.GetBinaryName = lambda: 'test-server'
       completer.DefaultSettings = lambda req: {}
 
-      request_data = BuildRequest( filepath = '/tmp/test.test', filetype = 'test' )
+      request_data = BuildRequest( filepath = '/tmp/test.test',
+                                   filetype = 'test' )
       completer._GetSettingsFromExtraConf( request_data )
 
       # Should use first match (primary key)
@@ -1703,7 +1708,8 @@ class LanguageServerCompleterSettings_test( TestCase ):
       }
     }
 
-    request_data = BuildRequest( filepath = '/tmp/test.test', filetype = 'test' )
+    request_data = BuildRequest( filepath = '/tmp/test.test',
+                                 filetype = 'test' )
     completer._GetSettingsFromExtraConf( request_data )
 
     # Check merge result:

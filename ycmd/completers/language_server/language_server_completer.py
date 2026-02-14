@@ -1029,6 +1029,9 @@ class LanguageServerCompleter( Completer ):
     self._stderr_file = None
     self._server_started = False
 
+    # Store configuration warnings to show in debug_info
+    self._config_warnings = []
+
     self._Reset()
 
 
@@ -1926,11 +1929,12 @@ class LanguageServerCompleter( Completer ):
     matched_keys = [ key for key in lookup_keys if key in completer_settings ]
     if matched_keys:
       if len( matched_keys ) > 1:
-        LOGGER.warning( 'Multiple settings found for %s completer: %s. '
-                       'Using first match %r. Please provide only one key.',
-                       self.GetServerName(),
-                       matched_keys,
-                       matched_keys[ 0 ] )
+        warning_msg = ( f'Multiple settings found for { self.GetServerName() } '
+                       f'completer: { matched_keys }. Using first match '
+                       f'{ matched_keys[ 0 ]!r }. '
+                       'Please provide only one key.' )
+        LOGGER.warning( warning_msg )
+        self._config_warnings.append( warning_msg )
 
       # Use first match
       global_settings = completer_settings[ matched_keys[ 0 ] ]
@@ -3174,7 +3178,7 @@ class LanguageServerCompleter( Completer ):
 
       return 'Initialized'
 
-    return [ responses.DebugInfoItem( 'Server State',
+    items = [ responses.DebugInfoItem( 'Server State',
                                       ServerStateDescription() ),
              responses.DebugInfoItem( 'Project Directory',
                                       self._project_directory ),
@@ -3185,6 +3189,15 @@ class LanguageServerCompleter( Completer ):
                json.dumps( self._settings.get( 'ls', {} ),
                            indent = 2,
                            sort_keys = True ) ) ]
+
+
+    # Add configuration warnings if any exist
+    if self._config_warnings:
+      items.append( responses.DebugInfoItem(
+        'Configuration Warnings',
+        '\n'.join( self._config_warnings ) ) )
+
+    return items
 
 
 def _DistanceOfPointToRange( point, range ):

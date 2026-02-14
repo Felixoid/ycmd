@@ -20,9 +20,11 @@ from unittest import TestCase
 from hamcrest import ( all_of,
                        assert_that,
                        calling,
+                       contains_string,
                        empty,
                        ends_with,
                        equal_to,
+                       has_length,
                        instance_of,
                        contains_exactly,
                        has_entries,
@@ -1632,6 +1634,7 @@ class LanguageServerCompleterSettings_test( TestCase ):
                  } ) )
 
 
+
   @IsolatedYcmd( {
     'completer_settings': {
       'test-server': {
@@ -1679,6 +1682,19 @@ class LanguageServerCompleterSettings_test( TestCase ):
 
       # Should have logged warning
       assert_that( logger.warning.called )
+      # Get debug items
+      debug_items = completer.CommonDebugItems()
+
+      # Check that warning is in debug info
+      warning_items = [ item for item in debug_items
+                      if item.key == 'Configuration Warnings' ]
+      assert_that( warning_items, has_length( 1 ) )
+      assert_that( warning_items[ 0 ].value,
+                  contains_string( 'Multiple settings found' ) )
+      assert_that( warning_items[ 0 ].value,
+                  contains_string( 'test' ) )
+      assert_that( warning_items[ 0 ].value,
+                    contains_string( 'test-server' ) )
 
 
   @IsolatedYcmd( {

@@ -92,6 +92,10 @@ class RustCompleter( language_server_completer.LanguageServerCompleter ):
     return 'Rust Language Server'
 
 
+  def GetBinaryName( self ):
+    return 'rust-analyzer'
+
+
   def GetCommandLine( self ):
     return [ self._ra_path ]
 

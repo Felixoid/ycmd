@@ -643,6 +643,11 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return 'jdt.ls'
 
 
+  def GetBinaryName( self ):
+    # Return 'jdtls' without the dot for cleaner configuration key
+    return 'jdtls'
+
+
   def GetCommandLine( self ):
     return self._command
 

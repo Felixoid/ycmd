@@ -239,6 +239,10 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
     return 'Clangd'
 
 
+  def GetBinaryName( self ):
+    return 'clangd'
+
+
   def GetCommandLine( self ):
     return self._clangd_command
 

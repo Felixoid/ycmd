@@ -1880,18 +1880,68 @@ class LanguageServerCompleter( Completer ):
     return {}
 
 
+  def GetBinaryName( self ):
+    """Returns the binary/alias name for this completer to use as a lookup key.
+
+    Subclasses should override this to return the server binary name
+    (e.g., 'gopls', 'rust-analyzer', 'jdtls', 'clangd').
+
+    Returns None by default (no alias support).
+    """
+    return None
+
+
+  def GetCompleterSettingsLookupKeys( self ):
+    """Returns a list of keys to look up in user_options['completer_settings'].
+
+    The keys are checked in order and the first match is used. This allows
+    supporting both language names (primary) and server binary names (aliases).
+
+    Default implementation returns SupportedFiletypes() and GetBinaryName().
+
+    Returns:
+      List of strings representing the lookup keys in priority order.
+    """
+    keys = list( self.SupportedFiletypes() )
+    binary_name = self.GetBinaryName()
+    if binary_name and binary_name not in keys:
+      keys.append( binary_name )
+    return keys
+
+
   def _GetSettingsFromExtraConf( self, request_data ):
     # The DefaultSettings method returns only the 'language server" ('ls')
     # settings, but self._settings is a wider dict containing a 'ls' key and any
     # other keys that we might want to add (e.g. 'project_directory',
     # 'capabilities', etc.)
+
+    # Layer 1: Start with hardcoded defaults from the completer class
     merged_ls_settings = self.DefaultSettings( request_data )
 
-    # If there is no extra-conf, the total settings are just the defaults:
+    # Layer 2: Merge with global settings from g:ycm_completer_settings
+    lookup_keys = self.GetCompleterSettingsLookupKeys()
+    completer_settings = self.user_options.get( 'completer_settings', {} )
+
+    # Find first matching key and detect duplicates
+    matched_keys = [ key for key in lookup_keys if key in completer_settings ]
+    if matched_keys:
+      if len( matched_keys ) > 1:
+        LOGGER.warning( 'Multiple settings found for %s completer: %s. '
+                       'Using first match %r. Please provide only one key.',
+                       self.GetServerName(),
+                       matched_keys,
+                       matched_keys[ 0 ] )
+
+      # Use first match
+      global_settings = completer_settings[ matched_keys[ 0 ] ]
+      utils.UpdateDict( merged_ls_settings, global_settings )
+
+    # If there is no extra-conf, the total settings are just the merged defaults:
     self._settings = {
       'ls': merged_ls_settings
     }
 
+    # Layer 3: Merge with project-specific settings from .ycm_extra_conf.py
     module = extra_conf_store.ModuleForSourceFile( request_data[ 'filepath' ] )
     if module:
       # The user-defined settings may contain a 'ls' key, which override (merge

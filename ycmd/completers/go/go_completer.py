@@ -57,6 +57,10 @@ class GoCompleter( language_server_completer.LanguageServerCompleter ):
     return 'gopls'
 
 
+  def GetBinaryName( self ):
+    return 'gopls'
+
+
   def GetProjectRootFiles( self ):
     # Without LSP workspaces support, GOPLS relies on the rootUri to detect a
     # project.
